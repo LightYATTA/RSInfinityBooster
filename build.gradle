@@ -30,8 +30,8 @@ repositories {
                 https://github.community/t/download-from-github-package-registry-without-authentication/14407/44
          */
         credentials {
-            username = "anything"
-            password = "\u0067hp_oGjcDFCn8jeTzIj4Ke9pLoEVtpnZMP4VQgaX"
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
         }
     }
     maven {
