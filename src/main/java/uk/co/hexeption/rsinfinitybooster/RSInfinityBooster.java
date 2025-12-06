@@ -15,6 +15,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.LoadingModList;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
+import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +32,25 @@ public class RSInfinityBooster {
 
     public static final String ID = "rsinfinitybooster";
     public static final ServerConfig SERVER_CONFIG = new ServerConfig();
+    
+    public static class ModTabs {
+        public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ID);
+        public static final RegistryObject<CreativeModeTab> RS_INFINITY_BOOSTER_TAB = CREATIVE_MODE_TABS.register("aeinfinitybooster", () -> CreativeModeTab.builder()
+                .icon(() -> new ItemStack(ModItems.INFINITY_CARD.get()))
+                .title(Component.translatable("item_group." + ID + ".tab"))
+                .displayItems((itemDisplayParameters, output) -> {
+                    for (Field field : ModItems.class.getFields()) {
+                        if (field.getType() != RegistryObject.class) continue;
+
+                        try {
+                            RegistryObject<Item> item = (RegistryObject<Item>) field.get(null);
+                            output.accept(new ItemStack(item.get()));
+                        } catch (IllegalAccessException e) {
+                        }
+                    }
+                })
+                .build());
+    }
 
     public RSInfinityBooster() {
 
@@ -39,36 +59,37 @@ public class RSInfinityBooster {
         Registration.register();
 
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.addListener((RegisterEvent event) -> {
-            if (event.getRegistryKey() == Registries.CREATIVE_MODE_TAB) {
-                registerTab(event.getVanillaRegistry());
-            }
-        });
+        ModTabs.CREATIVE_MODE_TABS.register(eventBus);
+        // eventBus.addListener((RegisterEvent event) -> {
+        //     if (event.getRegistryKey() == Registries.CREATIVE_MODE_TAB) {
+        //         registerTab(event.getVanillaRegistry());
+        //     }
+        // });
     }
 
 
-    public static void registerTab(Registry<CreativeModeTab> registry) {
-        var tab = CreativeModeTab.builder()
-                .icon(() -> new ItemStack(ModItems.INFINITY_CARD.get()))
-                .displayItems((itemDisplayParameters, output) -> {
+    // public static void registerTab(Registry<CreativeModeTab> registry) {
+    //     var tab = CreativeModeTab.builder()
+    //             .icon(() -> new ItemStack(ModItems.INFINITY_CARD.get()))
+    //             .displayItems((itemDisplayParameters, output) -> {
 
-                            for (Field field : ModItems.class.getFields()) {
-                                if (field.getType() != RegistryObject.class) continue;
+    //                         for (Field field : ModItems.class.getFields()) {
+    //                             if (field.getType() != RegistryObject.class) continue;
 
-                                try {
-                                    RegistryObject<Item> item = (RegistryObject<Item>) field.get(null);
-                                    output.accept(new ItemStack(item.get()));
-                                } catch (IllegalAccessException e) {
-                                }
-                            }
+    //                             try {
+    //                                 RegistryObject<Item> item = (RegistryObject<Item>) field.get(null);
+    //                                 output.accept(new ItemStack(item.get()));
+    //                             } catch (IllegalAccessException e) {
+    //                             }
+    //                         }
 
-                        }
-                )
-                .title(Component.translatable("item_group." + ID + ".tab"))
-                .build();
-        Registry.register(registry, new ResourceLocation(ID, "aeinfinitybooster"), tab);
+    //                     }
+    //             )
+    //             .title(Component.translatable("item_group." + ID + ".tab"))
+    //             .build();
+    //     Registry.register(registry, new ResourceLocation(ID, "aeinfinitybooster"), tab);
 
-    }
+    // }
 
     // From AE https://github.com/AppliedEnergistics/Applied-Energistics-2/blob/3552335d5d06dccd4f717510eda8bc7a39937a9e/src/main/java/appeng/mixins/ConfigPlugin.java#L52
     public static boolean isModLoaded(String modId) {
